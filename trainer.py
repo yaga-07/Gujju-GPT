@@ -104,8 +104,8 @@ def main():
     args = parser.parse_args()
 
     # Load data
-    train_data = torch.load(args.train_data)
-    val_data = torch.load(args.val_data)
+    train_data = np.load(args.train_data)
+    val_data = np.load(args.val_data)
 
     train_gpt(train_data, val_data, args.batch_size, args.learning_rate, args.epochs, args.device)
 
