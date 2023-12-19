@@ -1,0 +1,6 @@
+venv
+dataset_gujju
+.ipynb_checkpoints
+__pycache__
+tokenized_data
+data_arrays
