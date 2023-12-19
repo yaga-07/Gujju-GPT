@@ -48,7 +48,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
         optimizer.zero_grad()
 
         # Forward pass
-        logits = model(x)
+        logits = model(x, device)
 
         # Compute the loss
         loss = criterion(logits.view(-1, vocab_size), y.view(-1))
@@ -58,7 +58,8 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
 
         # Update the weights
         optimizer.step()
-
+        
+        print(f"Train loss {colored(loss.items(),'green')}")
         # Log training loss to TensorBoard
         writer.add_scalar('Loss/Train', loss.item(), epoch)
 
@@ -75,11 +76,12 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
             y_val = torch.stack([torch.from_numpy((val_data[i + 1:i + 1 + block_size]).astype(np.int64)) for i in ix_val]).to(device)
 
             # Forward pass for validation
-            val_logits = model(x_val)
+            val_logits = model(x_val, device)
 
             # Compute validation loss
             val_loss = criterion(val_logits.view(-1, vocab_size), y_val.view(-1))
-
+            
+            print(f"Val loss {colored(val_loss.items(),'green')}")
             # Log validation loss to TensorBoard
             writer.add_scalar('Loss/Validation', val_loss.item(), epoch)
 

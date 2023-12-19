@@ -101,7 +101,7 @@ class TransformerDecoder(nn.Module):
         for layer in self.layers:
             x = layer(x, mask)
         return x
-
+ 
 class TransformerDecoderModel(nn.Module):
     def __init__(self, vocab_size, d_model, num_heads, num_layers, d_ff, max_len, dropout=0.1):
         super(TransformerDecoderModel, self).__init__()
