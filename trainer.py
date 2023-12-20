@@ -66,7 +66,10 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
         # Update the weights
         optimizer.step()
         
-        print(f"Train loss {colored(loss.item(),'green')}")
+        
+        print(f"| {'Epoch':<5} | {'Train Loss':<15} |")
+        print(f"| {epoch:<5} | {colored(loss.item(), 'green'):<15} |")
+        print()
         # Log training loss to TensorBoard
         writer.add_scalar('Loss/Train', loss.item(), epoch)
 
@@ -88,7 +91,9 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
             # Compute validation loss
             val_loss = criterion(val_logits.view(-1, vocab_size), y_val.view(-1))
             
-            print(f"Val loss {colored(val_loss.item(),'green')}")
+            print(f"| {'Epoch':<5} | {'Val Loss':<15} |")
+            print(f"| {epoch:<5} | {colored(val_loss.item(), 'green'):<15} |")
+            print()
             # Log validation loss to TensorBoard
             writer.add_scalar('Loss/Validation', val_loss.item(), epoch)
 
