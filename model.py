@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
+from termcolor import colored
 
 config = {
 'vocab_size' : 100277,  # adjust based on your dataset
 'd_model' : 512,
 'num_heads' : 8,
 'num_layers' : 6,
-'d_ff' : 2048,
+'d_ff' : 1025,
 'max_len' : 128}
 
 class PositionalEncoding(nn.Module):
@@ -43,8 +44,10 @@ class MultiHeadAttention(nn.Module):
 
         # Scaled Dot-Product Attention
         scores = torch.matmul(Q, K.transpose(-2, -1)) / torch.sqrt(torch.tensor(self.head_dim, dtype=torch.float32))
+        # print(colored(f"score shape {scores.shape}","cyan"))
         if mask is not None:
-            scores = scores.masked_fill(mask == 0, float('-inf'))
+            scores = torch.tril(scores)
+            scores = scores.masked_fill(scores == 0, float('-inf'))
 
         attention_weights = torch.nn.functional.softmax(scores, dim=-1)
         attention_output = torch.matmul(attention_weights, V)
@@ -110,18 +113,12 @@ class TransformerDecoderModel(nn.Module):
         self.decoder = TransformerDecoder(num_layers, d_model, num_heads, d_ff, dropout)
         self.fc_out = nn.Linear(d_model, vocab_size)
 
-    def generate_square_subsequent_mask(self, sz):
-        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-        return mask
 
-    def forward(self, x, device):
-        seq_len = x.size(1)
-        mask = self.generate_square_subsequent_mask(seq_len).to(device)
+    def forward(self, x):
 
         x = self.embedding(x)
         x = self.positional_encoding(x)
-        x = self.decoder(x, mask)
+        x = self.decoder(x,mask=True)
         x = self.fc_out(x)
         return x
 

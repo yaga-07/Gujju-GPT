@@ -4,12 +4,15 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.nn import functional as F
 from torch.utils.tensorboard import SummaryWriter
 from model import config , TransformerDecoderModel
 
 
 
 def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
+    # Enable anomaly detection
+    torch.autograd.set_detect_anomaly(True)
     
     vocab_size = config['vocab_size']
     block_size = config['max_len']
@@ -48,10 +51,14 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
         optimizer.zero_grad()
 
         # Forward pass
-        logits = model(x, device)
+        logits = model(x)
+        # print(colored(f"logits shape {logits.shape}"))
+        # print(colored(f"logits shape {logits.view(-1, vocab_size).shape}"))
+
 
         # Compute the loss
-        loss = criterion(logits.view(-1, vocab_size), y.view(-1))
+        # loss = criterion(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
+        loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
 
         # Backward pass
         loss.backward()
@@ -76,7 +83,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
             y_val = torch.stack([torch.from_numpy((val_data[i + 1:i + 1 + block_size]).astype(np.int64)) for i in ix_val]).to(device)
 
             # Forward pass for validation
-            val_logits = model(x_val, device)
+            val_logits = model(x_val)
 
             # Compute validation loss
             val_loss = criterion(val_logits.view(-1, vocab_size), y_val.view(-1))
