@@ -10,7 +10,9 @@ from model import config , TransformerDecoderModel
 
 
 
-def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
+def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, model_path):
+    
+    print(f"Device in use {colored(device,'light_green')}")
     # Enable anomaly detection
     torch.autograd.set_detect_anomaly(True)
     
@@ -36,7 +38,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
     
     print(f"Strating traing for {colored(epochs,'yellow')}")
     # Training loop
-    for epoch in range(epochs):
+    for epoch in range(1,epochs):
         # Set the model in training mode
         model.train()
 
@@ -67,11 +69,10 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
         optimizer.step()
         
         
-        print(f"| {'Epoch':<5} | {'Train Loss':<15} |")
-        print(f"| {epoch:<5} | {colored(loss.item(), 'green'):<15} |")
+        print(f"| Epoch : {colored(epoch,'cyan')} | Train Loss : {colored(loss.item(), 'green')} |")
         print()
         # Log training loss to TensorBoard
-        writer.add_scalar('Loss/Train', loss.item(), epoch)
+        # writer.add_scalar('Loss/Train', loss.item(), epoch)
 
         # Validation
         if epoch % 2 == 0:
@@ -91,17 +92,16 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device):
             # Compute validation loss
             val_loss = criterion(val_logits.view(-1, vocab_size), y_val.view(-1))
             
-            print(f"| {'Epoch':<5} | {'Val Loss':<15} |")
-            print(f"| {epoch:<5} | {colored(val_loss.item(), 'green'):<15} |")
+            print(f"| Epoch : {colored(epoch,'cyan')} | Val Loss : {colored(val_loss.item(), 'green')} |")
             print()
             # Log validation loss to TensorBoard
-            writer.add_scalar('Loss/Validation', val_loss.item(), epoch)
+            # writer.add_scalar('Loss/Validation', val_loss.item(), epoch)
 
             # Set the model back to training mode
             model.train()
 
     # Save the trained model
-    torch.save(model.state_dict(), 'gujju-gpt.pth')
+    torch.save(model.state_dict(), model_path + f'/gujju-gpt_{epoch}.pth')
 
     # Close the TensorBoard writer
     writer.close()
@@ -114,14 +114,15 @@ def main():
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Learning rate')
     parser.add_argument('--epochs', type=int, default=10, help='Number of training epochs')
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu', help='Device for training (cuda or cpu)')
-
+    parser.add_argument('--model_save', required=True, help='Path to training data (train.npy)')
     args = parser.parse_args()
 
     # Load data
     train_data = np.load(args.train_data)
     val_data = np.load(args.val_data)
 
-    train_gpt(train_data, val_data, args.batch_size, args.learning_rate, args.epochs, args.device)
+    train_gpt(train_data, val_data, args.batch_size, 
+              args.learning_rate, args.epochs, args.device, args.model_save)
 
 if __name__ == "__main__":
     main()
