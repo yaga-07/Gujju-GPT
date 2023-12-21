@@ -11,3 +11,7 @@ array1_data.npy
 array2_data.npy
 gujju-gpt.pth
 main.py
+gujjugpt-venv
+dataset
+checkpoint
+data_prep.ipynb

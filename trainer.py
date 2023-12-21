@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import functional as F
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 from model import config , TransformerDecoderModel
 
 
@@ -32,9 +32,10 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
 
     # Set up TensorBoard
-    writer = SummaryWriter()
+    # writer = SummaryWriter()
     
     print(f"Strating traing for {colored(epochs,'yellow')}")
     # Training loop
@@ -67,6 +68,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
 
         # Update the weights
         optimizer.step()
+        scheduler.step()
         
         
         print(f"| Epoch : {colored(epoch,'cyan')} | Train Loss : {colored(loss.item(), 'green')} |")
@@ -99,12 +101,14 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
 
             # Set the model back to training mode
             model.train()
+            
+        if epoch % 100 == 0:
 
-    # Save the trained model
-    torch.save(model.state_dict(), model_path + f'/gujju-gpt_{epoch}.pth')
+            # Save the trained model
+            torch.save(model.state_dict(), model_path + f'/gujju-gpt_{epoch}.pth')
 
     # Close the TensorBoard writer
-    writer.close()
+    # writer.close()
 
 def main():
     parser = argparse.ArgumentParser(description='Train GPT model')

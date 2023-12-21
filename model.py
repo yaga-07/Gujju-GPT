@@ -3,7 +3,7 @@ import torch.nn as nn
 from termcolor import colored
 
 config = {
-'vocab_size' : 100277,  # adjust based on your dataset
+'vocab_size' : 25000,  # adjust based on your dataset
 'd_model' : 512,
 'num_heads' : 8,
 'num_layers' : 6,
