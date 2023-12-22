@@ -4,10 +4,10 @@ from termcolor import colored
 
 config = {
 'vocab_size' : 25000,  # adjust based on your dataset
-'d_model' : 512,
-'num_heads' : 8,
-'num_layers' : 6,
-'d_ff' : 1025,
+'d_model' : 1024,
+'num_heads' : 16,
+'num_layers' : 12,
+'d_ff' : 4096,
 'max_len' : 128}
 
 class PositionalEncoding(nn.Module):

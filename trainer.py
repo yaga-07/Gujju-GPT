@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import functional as F
+import pickle
 # from torch.utils.tensorboard import SummaryWriter
 from model import config , TransformerDecoderModel
 
@@ -26,7 +27,9 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
                                       config['max_len'],
                                       dropout=0.2).to(device)
     
-    print(colored("Tranformer GPT initialized","yellow"))
+    print(colored("Gujju GPT initialized","yellow"))
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"\nTotal Parameters: {colored(total_params,'yellow')}")    
 
     # Initialize model, loss, and optimizer
     
@@ -39,6 +42,8 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
     
     print(f"Strating traing for {colored(epochs,'yellow')}")
     # Training loop
+    train_loss_hist = []
+    val_loss_hist = []
     for epoch in range(1,epochs):
         # Set the model in training mode
         model.train()
@@ -73,6 +78,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
         
         print(f"| Epoch : {colored(epoch,'cyan')} | Train Loss : {colored(loss.item(), 'green')} |")
         print()
+        train_loss_hist.append(loss.item())
         # Log training loss to TensorBoard
         # writer.add_scalar('Loss/Train', loss.item(), epoch)
 
@@ -96,6 +102,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
             
             print(f"| Epoch : {colored(epoch,'cyan')} | Val Loss : {colored(val_loss.item(), 'green')} |")
             print()
+            val_loss_hist.append(val_loss.item())
             # Log validation loss to TensorBoard
             # writer.add_scalar('Loss/Validation', val_loss.item(), epoch)
 
@@ -106,6 +113,12 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
 
             # Save the trained model
             torch.save(model.state_dict(), model_path + f'/gujju-gpt_{epoch}.pth')
+            
+    with open(model_path + f'/gujju-gpt_{epoch}_train_loss.pkl', 'wb') as file:
+        pickle.dump(train_loss_hist, file)
+        
+    with open(model_path + f'/gujju-gpt_{epoch}_val_loss.pkl', 'wb') as file:
+        pickle.dump(val_loss_hist, file)
 
     # Close the TensorBoard writer
     # writer.close()
