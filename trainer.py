@@ -35,7 +35,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience = 5)
 
     # Set up TensorBoard
     # writer = SummaryWriter()
@@ -73,17 +73,19 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
 
         # Update the weights
         optimizer.step()
-        scheduler.step()
         
         
-        print(f"| Epoch : {colored(epoch,'cyan')} | Train Loss : {colored(loss.item(), 'green')} |")
+        
+        print(f"| Epoch : {colored(epoch,'cyan')}")
+        print(f"| Train Loss : {colored(loss.item(), 'green')} |")
+        print(f"| Current LR : {colored(optimizer.param_groups[0]['lr'], 'magenta')} |")
         print()
         train_loss_hist.append(loss.item())
         # Log training loss to TensorBoard
         # writer.add_scalar('Loss/Train', loss.item(), epoch)
 
         # Validation
-        if epoch % 2 == 0:
+        if epoch % 10 == 0:
             # Set the model in evaluation mode
             model.eval()
 
@@ -99,6 +101,7 @@ def train_gpt(train_data, val_data, batch_size, learning_rate, epochs, device, m
 
             # Compute validation loss
             val_loss = criterion(val_logits.view(-1, vocab_size), y_val.view(-1))
+            scheduler.step(val_loss)
             
             print(f"| Epoch : {colored(epoch,'cyan')} | Val Loss : {colored(val_loss.item(), 'green')} |")
             print()
