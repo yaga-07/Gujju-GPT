@@ -1,0 +1,17 @@
+venv
+dataset_gujju
+.ipynb_checkpoints
+__pycache__
+tokenized_data
+data_arrays
+train_misc.py
+main.py
+runs
+array1_data.npy
+array2_data.npy
+gujju-gpt.pth
+main.py
+gujjugpt-venv
+dataset
+checkpoint
+data_prep.ipynb
